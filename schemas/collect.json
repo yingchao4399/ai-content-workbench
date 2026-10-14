@@ -1,0 +1,1 @@
+{"type":"object","additionalProperties":false,"properties":{"suggestedTitle":{"type":"string"},"topicCard":{"type":"string"},"missingInfo":{"type":"array","items":{"type":"string"}}},"required":["suggestedTitle","topicCard","missingInfo"]}

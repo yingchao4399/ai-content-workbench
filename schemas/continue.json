@@ -1,0 +1,1 @@
+{"type":"object","additionalProperties":false,"properties":{"continuations":{"type":"array","minItems":3,"maxItems":3,"items":{"type":"string"}},"reviewNotes":{"type":"string"},"unknowns":{"type":"array","items":{"type":"string"}}},"required":["continuations","reviewNotes","unknowns"]}

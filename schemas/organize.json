@@ -1,0 +1,1 @@
+{"type":"object","additionalProperties":false,"properties":{"revisedBody":{"type":"string"},"reviewNotes":{"type":"string"},"needsConfirmation":{"type":"array","items":{"type":"string"}}},"required":["revisedBody","reviewNotes","needsConfirmation"]}

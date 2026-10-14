@@ -1,0 +1,10 @@
+node_modules/
+release/
+release-v*/
+data/
+artifacts/qa-data/
+artifacts/v3-ui-test-data/
+artifacts/packaged-smoke-data/
+artifacts/packaged-v2-smoke-data/
+artifacts/homework-docx-render/
+*.log

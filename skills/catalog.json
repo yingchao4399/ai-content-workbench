@@ -1,0 +1,7 @@
+[
+  {"id":"atomic-notes","title":"原子笔记与关联","modes":["note"],"summary":"把材料拆成独立观点，保留来源并提出可连接的旧笔记。","source":"https://github.com/mikonos/zettelkasten-agent-skills","file":"atomic-notes.md"},
+  {"id":"wechat-evidence","title":"公众号证据审稿","modes":["wechat"],"summary":"按读者问题组织文章，区分事实、推断和作者经历。","source":"https://github.com/flaqai/backlink_skills/blob/main/writer/wechat-writer/SKILL.md","file":"wechat-evidence.md"},
+  {"id":"fiction-continuity","title":"小说人物与连续性","modes":["fiction"],"summary":"检查人物动机、因果、视角、前文设定和场景变化。","source":"https://github.com/Yunshiro/yunn-skills/blob/main/skills/novel-writer/SKILL.md","file":"fiction-continuity.md"},
+  {"id":"poetry-form","title":"诗歌意象与节奏","modes":["poetry"],"summary":"用意象、分行、声音和转折服务诗的表达。","source":"https://github.com/Tibsfox/gsd-skill-creator/blob/main/examples/skills/writing/poetry-form/SKILL.md","file":"poetry-form.md"},
+  {"id":"essay-memory","title":"散文细节与回望","modes":["essay"],"summary":"从具体物件和记忆推进，保留真实经验的边界。","source":"https://github.com/tianyayu6/jiangnan-writer/blob/main/SKILL.md","file":"essay-memory.md"}
+]

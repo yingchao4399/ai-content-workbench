@@ -1,0 +1,54 @@
+{
+  "name": "ai-content-workbench",
+  "version": "0.1.0",
+  "private": true,
+  "description": "EasyInput 内容创作与笔记工作台",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test tests/*.test.cjs",
+    "package:win": "electron-builder --win --dir"
+  },
+  "devDependencies": {
+    "electron": "^38.0.0",
+    "electron-builder": "^26.0.0"
+  },
+  "build": {
+    "appId": "local.easyinput.content-workbench",
+    "productName": "AI 内容工作台",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "index.html",
+      "renderer.js",
+      "library-ui.js",
+      "studio-ui.js",
+      "styles.css",
+      "library.css",
+      "studio.css",
+      "lib/**/*",
+      "skills/**/*",
+      "schemas/**/*",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "node_modules/ffmpeg-static/**",
+      "node_modules/ffprobe-static/**"
+    ],
+    "win": {
+      "signAndEditExecutable": false
+    }
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.18",
+    "cheerio": "^1.2.0",
+    "ffmpeg-static": "^5.3.0",
+    "ffprobe-static": "^3.1.0",
+    "mammoth": "^1.13.0",
+    "pdf-parse": "^2.4.5",
+    "yaml": "^2.9.1"
+  }
+}
