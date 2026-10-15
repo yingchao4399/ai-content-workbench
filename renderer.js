@@ -176,6 +176,7 @@ async function saveCapturedNote() {
   if (!value) { toast('请输入要保存的文字'); return; }
   if (value.length > 200000) { toast('文字超过单篇笔记上限'); return; }
   const source = $('captureSource').value.trim();
+  const addToLibrary = $('captureAddToLibrary').checked;
   captureSaving = true; $('saveCapture').disabled = true;
   try {
     await createItem('note');
@@ -184,9 +185,22 @@ async function saveCapturedNote() {
     current.materials = source ? `来源：${source}` : '来源：剪贴板，原始链接待补充';
     if (pane === 'materials') $('sideText').value = current.materials;
     await saveNow({ stage: 'manual', summary: '从剪贴板创建速记' });
+    let materialAdded = false, libraryError = null;
+    if (addToLibrary) {
+      try {
+        const material = await window.workbench.addMaterialText({
+          title: current.title, category: '速记素材', content: value,
+          source: source || '剪贴板（来源待补）', storeMarkdown: true
+        });
+        current.materialIds = [...new Set([...(current.materialIds || []), material.id])];
+        await saveNow();
+        await window.libraryUI?.load(material.id);
+        materialAdded = true;
+      } catch (error) { libraryError = error; }
+    }
     displayCurrent();
     $('captureDialog').close();
-    toast('已保存为本地笔记，可以继续整理或引用');
+    toast(libraryError ? `笔记已保存，材料库同步失败：${libraryError.message}` : materialAdded ? '已保存笔记和材料，可在后续作品中引用' : '已保存为本地笔记，可以继续整理或引用', libraryError ? 9000 : 4000);
   } finally { captureSaving = false; $('saveCapture').disabled = false; }
 }
 async function deleteCurrent() {
