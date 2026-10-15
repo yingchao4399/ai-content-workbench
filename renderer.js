@@ -3,10 +3,11 @@ const LABELS = { note: '笔记', wechat: '公众号文章', fiction: '小说', p
 const ICONS = { note: '▤', wechat: '◉', fiction: '◈', poetry: '❋', essay: '☷' };
 const STAGE_LABELS = { collect: '搜集', continue: '续写', organize: '整理' };
 const ACTION_LABELS = { collect: '搜集', continue: 'AI 续写', organize: '整理', undo_ai: '撤销键入', redo_ai: '恢复键入', repeat_ai: '重复键入', new_note: '新建笔记', capture_clipboard_note: '剪贴板速记（先预览）', new_wechat: '新建公众号文章', new_fiction: '新建小说', new_poetry: '新建诗歌', new_essay: '新建散文', archive: '归档当前作品', settings: '打开设置', keep: '保留原功能' };
-const DEFAULT_ACTIONS = ['collect', 'continue', 'organize', 'new_note', 'new_wechat', 'new_fiction', 'new_poetry', 'new_essay'];
+const DEFAULT_ACTIONS = ['collect', 'continue', 'organize', 'capture_clipboard_note', 'new_wechat', 'new_fiction', 'new_poetry', 'new_essay'];
 const PANE_PLACEHOLDERS = { idea: '写下一个问题、一句灵感或创作意图……', materials: '粘贴真实素材、出处、人物设定或观察……', topicCard: '按“搜集”生成选题卡，也可以自己编辑……', reviewNotes: '记录审稿意见、修改方向和事实核查……' };
 let items = [], current = null, pane = 'idea', saveTimer = null, saving = Promise.resolve(), busy = false, keyActions = DEFAULT_ACTIONS;
 let keyCheckActive = false;
+let captureSaving = false;
 const keyCheckCounts = Array(8).fill(0);
 function renderKeyCheck() {
   $('toggleKeyCheck').textContent = keyCheckActive ? '结束检测' : '开始检测';
@@ -160,24 +161,33 @@ async function createItem(mode) {
   $('newMenu').classList.add('hidden'); window.libraryUI?.hide(); window.studioUI?.hide(); displayCurrent(); $('title').focus();
 }
 async function captureClipboardNote(text) {
+  if (captureSaving || $('captureDialog').open) { toast('请先处理当前速记预览'); return; }
   const value = String(text || '').trim();
   if (!value) { toast('剪贴板没有文字，未创建笔记'); return; }
   if (value.length > 200000) { toast('剪贴板文字超过单篇笔记上限，未创建笔记'); return; }
   $('captureText').value = value;
+  $('captureSource').value = '';
   $('captureDialog').showModal();
   $('captureText').focus();
 }
 async function saveCapturedNote() {
+  if (captureSaving) return;
   const value = $('captureText').value.trim();
   if (!value) { toast('请输入要保存的文字'); return; }
   if (value.length > 200000) { toast('文字超过单篇笔记上限'); return; }
-  await createItem('note');
-  $('title').value = `速记 ${new Date().toLocaleString('zh-CN')}`;
-  $('draft').value = value;
-  await saveNow({ stage: 'manual', summary: '从剪贴板创建速记' });
-  displayCurrent();
-  $('captureDialog').close();
-  toast('已保存为本地笔记，可以继续整理或引用');
+  const source = $('captureSource').value.trim();
+  captureSaving = true; $('saveCapture').disabled = true;
+  try {
+    await createItem('note');
+    $('title').value = `速记 ${new Date().toLocaleString('zh-CN')}`;
+    $('draft').value = value;
+    current.materials = source ? `来源：${source}` : '来源：剪贴板，原始链接待补充';
+    if (pane === 'materials') $('sideText').value = current.materials;
+    await saveNow({ stage: 'manual', summary: '从剪贴板创建速记' });
+    displayCurrent();
+    $('captureDialog').close();
+    toast('已保存为本地笔记，可以继续整理或引用');
+  } finally { captureSaving = false; $('saveCapture').disabled = false; }
 }
 async function deleteCurrent() {
   if (!current) return;

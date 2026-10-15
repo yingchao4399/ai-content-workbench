@@ -16,6 +16,16 @@ const { saveDraft, setInstalled, packageSkill, importSkill, listCustomSkills } =
 const appRoot = path.resolve(__dirname, '..');
 function tempDir() { return fs.mkdtempSync(path.join(os.tmpdir(), 'workbench-test-')); }
 
+test('新安装默认 KEY4 启用速记，已有八键设置继续保留', () => {
+  const root = tempDir();
+  try {
+    assert.equal(readSettings(root).keyActions[3], 'capture_clipboard_note');
+    const existing = ['collect', 'continue', 'organize', 'new_note', 'new_wechat', 'new_fiction', 'new_poetry', 'new_essay'];
+    fs.writeFileSync(path.join(root, 'settings.json'), JSON.stringify({ keyActions: existing }));
+    assert.deepEqual(readSettings(root).keyActions, existing);
+  } finally { fs.rmSync(root, { recursive: true, force: true }); }
+});
+
 test('作品保存、归档和待核实状态形成完整本地记录', () => {
   const root = tempDir();
   try {
