@@ -2,7 +2,7 @@ const $ = id => document.getElementById(id);
 const LABELS = { note: '笔记', wechat: '公众号文章', fiction: '小说', poetry: '诗歌', essay: '散文' };
 const ICONS = { note: '▤', wechat: '◉', fiction: '◈', poetry: '❋', essay: '☷' };
 const STAGE_LABELS = { collect: '搜集', continue: '续写', organize: '整理' };
-const ACTION_LABELS = { collect: '搜集', continue: 'AI 续写', organize: '整理', undo_ai: '撤销键入', redo_ai: '恢复键入', repeat_ai: '重复键入', new_note: '新建笔记', new_wechat: '新建公众号文章', new_fiction: '新建小说', new_poetry: '新建诗歌', new_essay: '新建散文', archive: '归档当前作品', settings: '打开设置', keep: '保留原功能' };
+const ACTION_LABELS = { collect: '搜集', continue: 'AI 续写', organize: '整理', undo_ai: '撤销键入', redo_ai: '恢复键入', repeat_ai: '重复键入', new_note: '新建笔记', capture_clipboard_note: '剪贴板速记（先预览）', new_wechat: '新建公众号文章', new_fiction: '新建小说', new_poetry: '新建诗歌', new_essay: '新建散文', archive: '归档当前作品', settings: '打开设置', keep: '保留原功能' };
 const DEFAULT_ACTIONS = ['collect', 'continue', 'organize', 'new_note', 'new_wechat', 'new_fiction', 'new_poetry', 'new_essay'];
 const PANE_PLACEHOLDERS = { idea: '写下一个问题、一句灵感或创作意图……', materials: '粘贴真实素材、出处、人物设定或观察……', topicCard: '按“搜集”生成选题卡，也可以自己编辑……', reviewNotes: '记录审稿意见、修改方向和事实核查……' };
 let items = [], current = null, pane = 'idea', saveTimer = null, saving = Promise.resolve(), busy = false, keyActions = DEFAULT_ACTIONS;
@@ -158,6 +158,26 @@ async function createItem(mode) {
   if (current) await saveNow();
   const item = await window.workbench.create(mode); items.unshift(item); current = item;
   $('newMenu').classList.add('hidden'); window.libraryUI?.hide(); window.studioUI?.hide(); displayCurrent(); $('title').focus();
+}
+async function captureClipboardNote(text) {
+  const value = String(text || '').trim();
+  if (!value) { toast('剪贴板没有文字，未创建笔记'); return; }
+  if (value.length > 200000) { toast('剪贴板文字超过单篇笔记上限，未创建笔记'); return; }
+  $('captureText').value = value;
+  $('captureDialog').showModal();
+  $('captureText').focus();
+}
+async function saveCapturedNote() {
+  const value = $('captureText').value.trim();
+  if (!value) { toast('请输入要保存的文字'); return; }
+  if (value.length > 200000) { toast('文字超过单篇笔记上限'); return; }
+  await createItem('note');
+  $('title').value = `速记 ${new Date().toLocaleString('zh-CN')}`;
+  $('draft').value = value;
+  await saveNow({ stage: 'manual', summary: '从剪贴板创建速记' });
+  displayCurrent();
+  $('captureDialog').close();
+  toast('已保存为本地笔记，可以继续整理或引用');
 }
 async function deleteCurrent() {
   if (!current) return;
@@ -509,6 +529,10 @@ async function init() {
   $('trashButton').onclick = () => openTrash().catch(error => toast(error.message, 9000));
   $('closeTrash').onclick = () => $('trashDialog').close();
   $('settingsButton').onclick = openSettings;
+  $('captureButton').onclick = async () => { try { await captureClipboardNote(await window.workbench.readClipboard()); } catch (error) { toast(error.message, 9000); } };
+  $('cancelCapture').onclick = () => $('captureDialog').close();
+  $('closeCapture').onclick = () => $('captureDialog').close();
+  $('saveCapture').onclick = () => saveCapturedNote().catch(error => toast(error.message, 9000));
   $('closeSettings').onclick = () => {
     if (keyCheckActive) { keyCheckActive = false; renderKeyCheck(); $('keyCheckStatus').textContent = '检测已结束；再次点击关闭设置。'; return; }
     $('settingsDialog').close();
@@ -539,7 +563,8 @@ async function init() {
       toast(`配置已写入，备份：${result.backup}。请启动 EasyInput 并同步到设备。`, 10000);
     } catch (error) { toast(error.message, 9000); }
   };
-  window.workbench.onShortcut(index => {
+  window.workbench.onShortcut(shortcut => {
+    const index = shortcut?.keyIndex;
     if (keyCheckActive) {
       if (Number.isInteger(index) && index >= 0 && index < keyCheckCounts.length) {
         keyCheckCounts[index] += 1;
@@ -553,6 +578,7 @@ async function init() {
     else if (action === 'undo_ai') undoAi();
     else if (action === 'redo_ai') redoAi();
     else if (action === 'repeat_ai') repeatAi();
+    else if (action === 'capture_clipboard_note') captureClipboardNote(shortcut.capturedText).catch(error => toast(error.message, 9000));
     else if (action?.startsWith('new_')) createItem(action.slice(4));
     else if (action === 'archive') $('archiveButton').click();
     else if (action === 'settings') openSettings();

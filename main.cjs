@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, globalShortcut, shell, safeStorage, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, globalShortcut, shell, safeStorage, dialog, clipboard } = require('electron');
 const path = require('node:path');
 const { createStore, MODES } = require('./lib/store.cjs');
 const { runStage, runMaterialAI, designSkill } = require('./lib/agent.cjs');
@@ -56,7 +56,9 @@ app.whenReady().then(() => {
       if (now - previous < 700) return;
       if (!window) makeWindow();
       window.show(); window.focus();
-      window.webContents.send('workbench:shortcut', keyIndex);
+      const action = readSettings(store.root).keyActions[keyIndex];
+      const capturedText = action === 'capture_clipboard_note' ? clipboard.readText() : null;
+      window.webContents.send('workbench:shortcut', { keyIndex, capturedText });
     });
   }
   app.on('activate', () => { if (!window) makeWindow(); });
@@ -69,6 +71,7 @@ ipcMain.handle('workbench:info', () => ({
   root: store.root, modes: MODES, keyActions: readSettings(store.root).keyActions,
   shortcuts: shortcuts.map(([accelerator, keyIndex]) => ({ accelerator, keyIndex, active: globalShortcut.isRegistered(accelerator) }))
 }));
+ipcMain.handle('workbench:clipboard-read', () => clipboard.readText());
 ipcMain.handle('workbench:list', () => store.list());
 ipcMain.handle('workbench:trash-list', () => store.listTrash());
 ipcMain.handle('workbench:create', (_event, mode) => store.create(mode));

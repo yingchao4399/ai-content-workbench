@@ -1,7 +1,10 @@
 node_modules/
 release/
 release-v*/
+release-lesson8/
 data/
+artifacts/lesson8-smoke-data/
+artifacts/lesson8-packaged-test-data/
 artifacts/qa-data/
 artifacts/v3-ui-test-data/
 artifacts/packaged-smoke-data/

@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-15",
+  "timeZone": "Asia/Shanghai",
+  "device": "EasyInput AI 八键设备",
+  "testConfiguration": "独立数据目录中 KEY4 映射为 capture_clipboard_note；原设备组合键配置未改动",
+  "appBefore": {
+    "key4Action": "capture_clipboard_note",
+    "key4GlobalShortcutRegistered": true,
+    "allEightGlobalShortcutsRegistered": true,
+    "itemCount": 2
+  },
+  "userObserved": "短按实体 KEY4 后看到剪贴板速记预览框，并手动点击保存为笔记",
+  "appAfter": {
+    "itemCount": 3,
+    "latestTitleHasQuickCaptureTimestamp": true,
+    "latestDraftCharacterCount": 402,
+    "latestHistorySummary": "从剪贴板创建速记"
+  },
+  "contentPublished": false,
+  "evidenceBoundary": "用户现场确认 + 应用落盘记录；未抓取设备内部按键日志，也不公开测试剪贴板正文"
+}

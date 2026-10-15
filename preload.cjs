@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('workbench', {
   run: (id, stage, context) => ipcRenderer.invoke('workbench:run', id, stage, context),
   archive: (id) => ipcRenderer.invoke('workbench:archive', id),
   info: () => ipcRenderer.invoke('workbench:info'),
+  readClipboard: () => ipcRenderer.invoke('workbench:clipboard-read'),
   settings: () => ipcRenderer.invoke('workbench:settings'),
   keyboardStatus: () => ipcRenderer.invoke('workbench:keyboard-status'),
   saveSettings: (input) => ipcRenderer.invoke('workbench:settings-save', input),
@@ -36,7 +37,7 @@ contextBridge.exposeInMainWorld('workbench', {
   openMaterial: (id) => ipcRenderer.invoke('workbench:material-open', id),
   applyKeyboard: (keys) => ipcRenderer.invoke('workbench:keyboard-apply', keys),
   onShortcut: (handler) => {
-    const listener = (_event, keyIndex) => handler(keyIndex);
+    const listener = (_event, shortcut) => handler(shortcut);
     ipcRenderer.on('workbench:shortcut', listener);
     return () => ipcRenderer.removeListener('workbench:shortcut', listener);
   }
